@@ -3,6 +3,7 @@ package edu.knowitall.taggers.tag;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +30,8 @@ import edu.knowitall.tool.stem.Lemmatized;
 import edu.washington.cs.knowitall.logic.ArgFactory;
 import edu.washington.cs.knowitall.logic.LogicExpression;
 import edu.washington.cs.knowitall.regex.Expression.BaseExpression;
+import edu.washington.cs.knowitall.regex.Expression;
+import edu.washington.cs.knowitall.regex.Expression.NamedGroup;
 import edu.washington.cs.knowitall.regex.ExpressionFactory;
 import edu.washington.cs.knowitall.regex.Match;
 import edu.washington.cs.knowitall.regex.RegularExpression;
@@ -194,20 +197,23 @@ public class PatternTagger extends Tagger {
 
         List<Match<TypedToken>> matches = pattern.findAll(typedTokenSentence);
         for (Match<TypedToken> match : matches) {
-            final Match.Group<TypedToken> group;
+            final Match.Group<TypedToken> group0 = match.groups().get(0);
+            Map<String,String> groupMap = new HashMap<String,String>();
+            
+            
+            for(Match.Group<TypedToken> g : match.groups()){
+            	if (g.expr instanceof NamedGroup<?>){
+                    NamedGroup<TypedToken> namedGroup = (NamedGroup<TypedToken>) g.expr;
+                    List<TypedToken> tokens =g.tokens();
+                    String matchString = "";
+                    for(TypedToken t : tokens){
+                    	matchString += t.token.token().string() + " ";
+                    }
+                    groupMap.put(namedGroup.name,matchString);
+                    }
+            }
 
-            int groupSize = match.groups().size();
-            if (groupSize == 1) {
-                group = match.groups().get(0);
-            }
-            else if (groupSize == 2) {
-                group = match.groups().get(1);
-            }
-            else {
-                throw new IllegalArgumentException("There must not be exactly more than one capture group.");
-            }
-
-            Type tag = Type.fromSentence(sentence, this.descriptor, this.source, intervalFromGroup(group));
+            Type tag = Type.fromSentenceWithGroupMap(sentence, this.descriptor, this.source, intervalFromGroup(group0),groupMap);
             tags.add(tag);
         }
 
