@@ -8,9 +8,9 @@ object TaggerBuild extends Build {
     publish := { },
     publishTo := Some("bogus" at "http://nowhere.com"),
     publishLocal := { }
-  ).aggregate(core, webapp)
+  ).aggregate(core, cli, webapp)
 
-  val buildSettings = Defaults.defaultSettings ++ ReleaseSettings.defaults ++
+  val buildSettings = Defaults.defaultSettings ++ ReleaseSettings.defaults ++ Format.settings ++
     Seq(
       organization := "edu.washington.cs.knowitall.taggers",
       crossScalaVersions := Seq("2.10.2"),
@@ -41,12 +41,17 @@ object TaggerBuild extends Build {
         </developers>))
 
   lazy val core = Project(
-    id = "taggers-core",
+    id = "core",
     base = file("core"),
     settings = buildSettings)
 
   lazy val webapp = Project(
-    id = "taggers-webapp",
+    id = "webapp",
     base = file("webapp"),
+    settings = buildSettings) dependsOn(core)
+
+  lazy val cli = Project(
+    id = "cli",
+    base = file("cli"),
     settings = buildSettings) dependsOn(core)
 }
