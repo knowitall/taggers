@@ -13,14 +13,14 @@ import org.scalatest.FlatSpec
 import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.collection.JavaConverters.seqAsJavaListConverter
 
-class TaggerSpec extends FlatSpec {
+class KeywordTaggerSpec extends FlatSpec {
   val chunker = new OpenNlpChunker();
   val morpha = new MorphaStemmer();
 
-  val runTagger = new ConstrainedTagger(new KeywordTagger("Run", Seq("run")), Seq(VerbPhraseConstraint))
+  val runTagger = new KeywordTagger("RoadTagger", Seq("road"))
 
-  "runTagger" should "match verb run" in {
-    val sentenceText = "The man had run down the road."
+  "a keyword tagger" should "match the last token in a sentence" in {
+    val sentenceText = "The man had run down the road"
     val opennlpChunker = new OpenNlpChunker
     val s = new Sentence(sentenceText) with sentence.Chunker with sentence.Lemmatizer {
       override val chunker = new OpenNlpChunker
@@ -29,20 +29,6 @@ class TaggerSpec extends FlatSpec {
 
     val types = runTagger.apply(s)
 
-    assert(types.head.name === "Run")
-    assert(types.head.text === "run")
-  }
-
-  "runTagger" should "not match noun run" in {
-    val sentenceText = "The man went for a run."
-    val opennlpChunker = new OpenNlpChunker
-    val s = new Sentence(sentenceText) with sentence.Chunker with sentence.Lemmatizer {
-      override val chunker = new OpenNlpChunker
-      override val lemmatizer = MorphaStemmer
-    }
-
-    val types = runTagger.apply(s)
-
-    assert(types.isEmpty)
+    assert(types.size === 1)
   }
 }
