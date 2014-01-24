@@ -1,17 +1,18 @@
 package edu.knowitall.taggers
 
-import scala.collection.JavaConverters._
-import edu.knowitall.tool.stem.Lemmatized
-import edu.knowitall.tool.chunk.ChunkedToken
-import edu.knowitall.tool.typer.Type
 import edu.knowitall.collection.immutable.Interval
-import edu.knowitall.tool.tokenize.Tokenizer
 import edu.knowitall.repr.sentence.Sentence
-import edu.knowitall.repr.sentence.Tokenized
+import edu.knowitall.repr.sentence.Tokens
+import edu.knowitall.tool.chunk.ChunkedToken
+import edu.knowitall.tool.stem.Lemmatized
 import edu.knowitall.tool.tokenize.Token
+import edu.knowitall.tool.tokenize.Tokenizer
+import edu.knowitall.tool.typer.Type
+
+import scala.collection.JavaConverters._
 
 object TypeHelper {
-  def fromSentence(sentence: Sentence with Tokenized, name: String, source: String, interval: Interval): Type = {
+  def fromSentence(sentence: Sentence with Tokens, name: String, source: String, interval: Interval): Type = {
     val tokens = sentence.tokens.slice(interval.start, interval.end)
     this.fromSentenceIterator(tokens, name, source, interval)
   }
