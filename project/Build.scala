@@ -1,25 +1,29 @@
 import sbt._
 import Keys._
 
+import spray.revolver.RevolverPlugin._
+
 object TaggerBuild extends Build {
+  val sprayVersion = "1.2.0"
+  val akkaVersion = "2.2.3"
   val nlptoolsVersion = SettingKey[String]("nlptools-version", "The version of nlptools used for building.")
 
-  lazy val root = Project(id = "taggers", base = file(".")).settings (
+  lazy val root = Project(id = "taggers-root", base = file(".")).settings (
     publish := { },
     publishTo := Some("bogus" at "http://nowhere.com"),
     publishLocal := { }
-  ).aggregate(core, webapp)
+  ).aggregate(core, cli, webapp)
 
-  val buildSettings = Defaults.defaultSettings ++ ReleaseSettings.defaults ++
+  val buildSettings = Defaults.defaultSettings ++ ReleaseSettings.defaults ++ Format.settings ++ Revolver.settings ++
     Seq(
-      organization := "edu.washington.cs.knowitall.taggers",
-      crossScalaVersions := Seq("2.10.2"),
+      organization := "org.allenai.taggers",
+      crossScalaVersions := Seq("2.10.3"),
       scalaVersion <<= crossScalaVersions { (vs: Seq[String]) => vs.head },
-      nlptoolsVersion := "2.4.4",
+      nlptoolsVersion := "2.5.0-SNAPSHOT",
       scalacOptions ++= Seq("-unchecked", "-deprecation"),
       homepage := Some(url("http://github.com/knowitall/taggers")),
+      licenses := Seq("Apache 2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0.html")),
       resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-      licenses := Seq("Apache 2.0" -> url("https://raw.github.com/knowitall/ollie/master/LICENSE")),
       publishMavenStyle := true,
       publishTo <<= version { (v: String) =>
         val nexus = "https://oss.sonatype.org/"
@@ -41,12 +45,17 @@ object TaggerBuild extends Build {
         </developers>))
 
   lazy val core = Project(
-    id = "taggers-core",
+    id = "core",
     base = file("core"),
     settings = buildSettings)
 
   lazy val webapp = Project(
-    id = "taggers-webapp",
+    id = "webapp",
     base = file("webapp"),
+    settings = buildSettings) dependsOn(core)
+
+  lazy val cli = Project(
+    id = "cli",
+    base = file("cli"),
     settings = buildSettings) dependsOn(core)
 }

@@ -1,15 +1,17 @@
 package edu.knowitall.taggers.pattern
 
-import edu.knowitall.tool.stem.Lemmatized
-import edu.knowitall.tool.chunk.ChunkedToken
-import edu.knowitall.openregex
-import java.util.regex.Pattern
-import edu.washington.cs.knowitall.logic.LogicExpression
 import edu.knowitall.collection.immutable.Interval
-import edu.washington.cs.knowitall.regex.Expression
+import edu.knowitall.openregex
+import edu.knowitall.tool.chunk.ChunkedToken
+import edu.knowitall.tool.stem.Lemmatized
 import edu.washington.cs.knowitall.logic
+import edu.washington.cs.knowitall.logic.LogicExpression
+import edu.washington.cs.knowitall.regex.Expression
+
 import com.google.common.base.{ Function => GuavaFunction }
 import org.apache.commons.lang3.StringEscapeUtils
+
+import java.util.regex.Pattern
 
 object PatternBuilder {
   type Token = TypedToken
@@ -34,34 +36,31 @@ object PatternBuilder {
 
   val regexLiteralRegex = ("/" + """((?:[^/\\]*(?:\\)*(?:\\/)*)*)""" + "/").r
 
-
-  /**
-   * *
-   * This class compiles regular expressions over the tokens in a sentence
-   * into an NFA. There is a lot of redundancy in their expressiveness. This
-   * is largely because it supports pattern matching on the fields This is not
-   * necessary but is an optimization and a shorthand (i.e.
-   * {@code <pos="NNPS?"> is equivalent to "<pos="NNP" | pos="NNPS">} and
-   * {@code (?:<pos="NNP"> | <pos="NNPS">)}.
-   * <p>
-   * Here are some equivalent examples:
-   * <ol>
-   * <li> {@code <pos="JJ">* <pos="NNP.">+}
-   * <li> {@code <pos="JJ">* <pos="NNPS?">+}
-   * <li> {@code <pos="JJ">* <pos="NNP" | pos="NNPS">+}
-   * <li> {@code <pos="JJ">* (?:<pos="NNP"> | <pos="NNPS">)+}
-   * </ol>
-   * Note that (3) and (4) are not preferred for efficiency reasons. Regex OR
-   * (in example (4)) should only be used on multi-token sequences.
-   * <p>
-   * The Regular Expressions support named groups (<name>: ... ), unnamed
-   * groups (?: ... ), and capturing groups ( ... ). The operators allowed are
-   * +, ?, *, and |. The Logic Expressions (that describe each token) allow
-   * grouping "( ... )", not '!', or '|', and and '&'.
-   *
-   * @param regex
-   * @return
-  **/
+  /** This class compiles regular expressions over the tokens in a sentence
+    * into an NFA. There is a lot of redundancy in their expressiveness. This
+    * is largely because it supports pattern matching on the fields This is not
+    * necessary but is an optimization and a shorthand (i.e.
+    * {@code <pos="NNPS?"> is equivalent to "<pos="NNP" | pos="NNPS">} and
+    * {@code (?:<pos="NNP"> | <pos="NNPS">)}.
+    * <p>
+    * Here are some equivalent examples:
+    * <ol>
+    * <li> {@code <pos="JJ">* <pos="NNP.">+}
+    * <li> {@code <pos="JJ">* <pos="NNPS?">+}
+    * <li> {@code <pos="JJ">* <pos="NNP" | pos="NNPS">+}
+    * <li> {@code <pos="JJ">* (?:<pos="NNP"> | <pos="NNPS">)+}
+    * </ol>
+    * Note that (3) and (4) are not preferred for efficiency reasons. Regex OR
+    * (in example (4)) should only be used on multi-token sequences.
+    * <p>
+    * The Regular Expressions support named groups (<name>: ... ), unnamed
+    * groups (?: ... ), and capturing groups ( ... ). The operators allowed are
+    * +, ?, *, and |. The Logic Expressions (that describe each token) allow
+    * grouping "( ... )", not '!', or '|', and and '&'.
+    *
+    * @param regex
+    * @return
+    */
   def compile(pattern: String) =
     openregex.Pattern.compile(pattern, (expression: String) => {
       new Function[Token, Boolean] {
